@@ -23,7 +23,7 @@ time_table_drop = "DROP TABLE IF EXISTS time CASCADE"
 # CREATE TABLES
 
 staging_events_table_create= ("""CREATE TABLE IF NOT EXISTS staging_events
-                                (   id BIGINT IDENTITY(0,1) NOT NULL,
+                                (   id BIGINT IDENTITY(0,1),
                                     artist VARCHAR(MAX),
                                     auth VARCHAR,
                                     firstName VARCHAR,
@@ -36,10 +36,10 @@ staging_events_table_create= ("""CREATE TABLE IF NOT EXISTS staging_events
                                     method VARCHAR,
                                     page VARCHAR,
                                     registration VARCHAR,
-                                    sessionId INT NOT NULL,
+                                    sessionId INT,
                                     song VARCHAR(MAX),
                                     status INT,
-                                    ts BIGINT NOT NULL,
+                                    ts BIGINT,
                                     userAgent VARCHAR,
                                     userID INT
                                 )
@@ -49,12 +49,12 @@ staging_events_table_create= ("""CREATE TABLE IF NOT EXISTS staging_events
 staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs
                                 (
                                     num_song INT,
-                                    artist_id VARCHAR NOT NULL,
+                                    artist_id VARCHAR,
                                     artist_latitude VARCHAR,
                                     artist_longitude VARCHAR,
                                     artist_location VARCHAR,
                                     artist_name VARCHAR(MAX),
-                                    song_id VARCHAR NOT NULL,
+                                    song_id VARCHAR,
                                     title VARCHAR(MAX),
                                     duration DECIMAL,
                                     year INT
@@ -63,7 +63,7 @@ staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs
 
 songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays
                             (
-                                songplay_id INT  IDENTITY(0,1) NOT NULL SORTKEY,
+                                songplay_id INT  IDENTITY(0,1) NOT NULL SORTKEY PRIMARY KEY,
                                 start_time TIMESTAMP NOT NULL,
                                 user_id VARCHAR NOT NULL DISTKEY,
                                 level VARCHAR NOT NULL,
@@ -72,12 +72,12 @@ songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays
                                 session_id INT NOT NULL,
                                 location VARCHAR,
                                 user_agent VARCHAR
-                            )   
+                            )
                         """)
 
 user_table_create = ("""CREATE TABLE IF NOT EXISTS users
                         (
-                            user_id INT NOT NULL SORTKEY,
+                            user_id INT NOT NULL SORTKEY PRIMARY KEY,
                             first_name VARCHAR,
                             last_name VARCHAR,
                             gender VARCHAR,
@@ -87,18 +87,18 @@ user_table_create = ("""CREATE TABLE IF NOT EXISTS users
 
 song_table_create = ("""CREATE TABLE IF NOT EXISTS songs
                         (
-                            song_id VARCHAR NOT NULL SORTKEY,
+                            song_id VARCHAR NOT NULL PRIMARY KEY,
                             title VARCHAR(MAX) NOT NULL,
                             artist_id VARCHAR NOT NULL DISTKEY,
                             year INT NOT NULL,
                             duration DECIMAL NOT NULL
-                        )
+                        )COMPOUND SORTKEY(title, duration)
                     """)
 
 artist_table_create = ("""CREATE TABLE IF NOT EXISTS artists
                         (
-                            artist_id VARCHAR NOT NULL SORTKEY,
-                            name VARCHAR(MAX),
+                            artist_id VARCHAR NOT NULL PRIMARY KEY,
+                            name VARCHAR(MAX) SORTKEY,
                             location VARCHAR,
                             latitude VARCHAR,
                             longitude VARCHAR
@@ -107,7 +107,7 @@ artist_table_create = ("""CREATE TABLE IF NOT EXISTS artists
 
 time_table_create = ("""CREATE TABLE IF NOT EXISTS time
                         (
-                            start_time TIMESTAMP NOT NULL SORTKEY,
+                            start_time TIMESTAMP NOT NULL SORTKEY PRIMARY KEY,
                             hour INT,
                             day INT,
                             week INT,
@@ -157,7 +157,10 @@ songplay_table_insert = ("""INSERT INTO songplays
                                 se.location AS location,
                                 se.userAgent AS user_agent
                             FROM staging_events AS se
-                            JOIN staging_songs AS ss ON (se.artist = ss.artist_name)
+                            JOIN staging_songs AS ss 
+                            ON (se.artist = ss.artist_name)
+                            AND (se.song = ss.title)
+                            AND (se.length = ss.duration)
                             WHERE se.page = 'NextSong';
                         """)
 
