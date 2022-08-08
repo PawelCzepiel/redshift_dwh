@@ -69,7 +69,7 @@ songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays
                                 level VARCHAR NOT NULL,
                                 song_id VARCHAR NOT NULL,
                                 artist_id VARCHAR NOT NULL,
-                                session_id VARCHAR NOT NULL,
+                                session_id INT NOT NULL,
                                 location VARCHAR,
                                 user_agent VARCHAR
                             )   
@@ -100,8 +100,8 @@ artist_table_create = ("""CREATE TABLE IF NOT EXISTS artists
                             artist_id VARCHAR NOT NULL SORTKEY,
                             name VARCHAR(MAX),
                             location VARCHAR,
-                            latitude REAL,
-                            longitude REAL
+                            latitude VARCHAR,
+                            longitude VARCHAR
                         )diststyle all;
                     """)
 
@@ -152,6 +152,7 @@ songplay_table_insert = ("""INSERT INTO songplays
                                 se.userID AS user_id,
                                 se.level AS level,
                                 ss.song_id AS song_id,
+                                ss.artist_id AS artist_id,
                                 se.sessionId AS session_id,
                                 se.location AS location,
                                 se.userAgent AS user_agent
@@ -176,7 +177,7 @@ user_table_insert = ("""INSERT INTO users
                             se.level AS level
                         FROM staging_events AS se
                         WHERE se.UserID is NOT NULL
-                        HERE se.page = 'NextSong';                 
+                        AND se.page = 'NextSong';                 
                     """)
 
 song_table_insert = ("""INSERT INTO songs

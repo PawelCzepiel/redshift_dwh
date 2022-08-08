@@ -7,7 +7,6 @@ Sparkify data resides in AWS S3 in 2 directories containing:
 In order to improve data analytics, it is advised to build Redshift
 data warehouse together with ETL pipeline extracting data from S3 bucket
 and eventually creating a star schema architecture allowing for easy quering.
-Such approach prevents from easy data quering.
 
 # 2. MANUAL
 
@@ -44,8 +43,8 @@ ETL script extracts data from JSON files, loads it into staging tables followed 
 moving the data to final star schema.
 
 ## 3.4 dwh.cfg
-Stores Redshift database and IAM role info. 
 
+Stores Redshift database and IAM role info. 
 
 ## 3.5 README.md
 
@@ -57,7 +56,7 @@ Sparkify Redshift database Schema is of a Star type, providing best results for 
 This architecture shall allow for fast aggregations and simple queries (also those not yet foreseen).
 
 ## 4.1 Staging Tables
-Before the data lands in the final tables, it id initially loaded inside the staging tables:
+Before the data lands in the final tables, it is initially loaded inside the staging tables:
 - staging_events
             artist, auth, firstName, gender, itemInSession, lastName, length, level, location,
             method, page, registration, ressionId, song, status, ts, userAgent, userId
@@ -82,3 +81,11 @@ The final schema consists of:
                   artist_id, name, location, lattitude, longitude
     time - timestamps of records in songplays broken down into specific units
                   start_time, hour, day, week, month, year, weekday
+
+# 5. EXAMPLE QUERIES
+
+# 5.1 Getting song title and count of its plays
+
+SELECT title, COUNT(*) FROM songplays sp 
+JOIN songs s ON sp.song_id = s.song_id
+GROUP BY title
